@@ -10,86 +10,57 @@ interface Props {
 
 export function RouteMap({ stops, className }: Props) {
   const mapContainerRef = useRef<HTMLDivElement>(null)
-  const mapRef = useRef<mapboxgl.Map | null>(null)
+  const mapRef = useRef<L.Map | null>(null)
 
   useEffect(() => {
     if (!mapContainerRef.current || stops.length === 0) return
     if (mapRef.current) return
 
-    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
-    if (!token) return
-
     Promise.all([
-      import('mapbox-gl'),
-      import('mapbox-gl/dist/mapbox-gl.css' as string),
-    ]).then(([{ default: mapboxgl }]) => {
-      mapboxgl.accessToken = token
+      import('leaflet'),
+      import('leaflet/dist/leaflet.css' as string),
+    ]).then(([{ default: L }]) => {
+      if (!mapContainerRef.current || mapRef.current) return
 
       const center = stops[Math.floor(stops.length / 2)]
-      const map = new mapboxgl.Map({
-        container: mapContainerRef.current!,
-        style: 'mapbox://styles/mapbox/dark-v11',
-        center: [center.lng, center.lat],
-        zoom: 13,
-      })
+      const map = L.map(mapContainerRef.current).setView([center.lat, center.lng], 14)
       mapRef.current = map
 
-      map.on('load', () => {
-        // Add route line
-        map.addSource('route', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates: stops.map(s => [s.lng, s.lat]),
-            },
-          },
-        })
-        map.addLayer({
-          id: 'route-line',
-          type: 'line',
-          source: 'route',
-          paint: {
-            'line-color': '#a855f7',
-            'line-width': 3,
-            'line-dasharray': [2, 1],
-          },
-        })
+      // OpenStreetMap tiles — 100% free, no key needed
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(map)
 
-        // Add markers
-        stops.forEach((stop, idx) => {
-          const el = document.createElement('div')
-          el.style.cssText = `
-            width: 32px; height: 32px;
-            background: linear-gradient(135deg, #a855f7, #f97316);
-            border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-weight: bold; font-size: 13px;
-            border: 2px solid white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-            cursor: pointer;
-          `
-          el.textContent = String(idx + 1)
+      // Route polyline
+      const coords = stops.map(s => [s.lat, s.lng] as [number, number])
+      L.polyline(coords, { color: '#a855f7', weight: 3, dashArray: '8 4' }).addTo(map)
 
-          new mapboxgl.Marker({ element: el })
-            .setLngLat([stop.lng, stop.lat])
-            .setPopup(
-              new mapboxgl.Popup({ offset: 20, closeButton: false }).setHTML(
-                `<strong>${stop.name}</strong><br/><small>${stop.address}</small>`
-              )
-            )
-            .addTo(map)
+      // Numbered markers
+      stops.forEach((stop, idx) => {
+        const icon = L.divIcon({
+          html: `<div style="
+            width:32px;height:32px;
+            background:linear-gradient(135deg,#a855f7,#f97316);
+            border-radius:50%;
+            display:flex;align-items:center;justify-content:center;
+            color:white;font-weight:700;font-size:13px;
+            border:2px solid white;
+            box-shadow:0 2px 8px rgba(0,0,0,0.35);
+            cursor:pointer;
+          ">${idx + 1}</div>`,
+          className: '',
+          iconSize: [32, 32],
+          iconAnchor: [16, 16],
         })
 
-        // Fit bounds
-        const bounds = stops.reduce(
-          (b, s) => b.extend([s.lng, s.lat]),
-          new mapboxgl.LngLatBounds([stops[0].lng, stops[0].lat], [stops[0].lng, stops[0].lat])
-        )
-        map.fitBounds(bounds, { padding: 60 })
+        L.marker([stop.lat, stop.lng], { icon })
+          .bindPopup(`<strong>${stop.name}</strong><br/><small>${stop.address}</small>`)
+          .addTo(map)
       })
+
+      // Fit all markers in view
+      map.fitBounds(L.latLngBounds(coords), { padding: [48, 48] })
     })
 
     return () => {
@@ -97,27 +68,6 @@ export function RouteMap({ stops, className }: Props) {
       mapRef.current = null
     }
   }, [stops])
-
-  if (!process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
-    return (
-      <div
-        className={className}
-        style={{
-          background: 'var(--bg-card)',
-          border: '1px solid var(--border)',
-          borderRadius: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: 'var(--text-secondary)',
-          fontSize: '14px',
-          minHeight: '300px',
-        }}
-      >
-        🗺️ Карта недоступна (нет NEXT_PUBLIC_MAPBOX_TOKEN)
-      </div>
-    )
-  }
 
   return (
     <div
