@@ -1,7 +1,8 @@
-import Anthropic from '@anthropic-ai/sdk'
-import { TravelerProfile, GeneratedRoute, Stop, QuestStep, WeatherData } from './types'
+import OpenAI from 'openai'
+import { TravelerProfile, GeneratedRoute, Stop, WeatherData } from './types'
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
+const MODEL = 'gpt-4o'
+const getClient = () => new OpenAI({ apiKey: process.env.OPENAI_API_KEY ?? 'missing' })
 
 const BUDGET_LABELS: Record<string, string> = {
   budget: 'бюджетный (уличная еда, бесплатные места)',
@@ -26,7 +27,7 @@ export async function generateRoute(
 
   const childrenDesc =
     profile.childrenAges.length > 0
-      ? `Дети возраста: ${profile.childrenAges.join(', ')} лет. Учитывай усталость и интерес детей — короткие переходы, развлечения.`
+      ? `Дети возраста: ${profile.childrenAges.join(', ')} лет. Учитывай усталость — короткие переходы, интересные места.`
       : 'Детей нет.'
 
   const prompt = `Ты опытный местный гид. Сгенерируй туристический маршрут по городу ${profile.city}.
@@ -66,15 +67,14 @@ ${weatherDesc}
 - Логичный порядок (минимум ходьбы)
 - ${profile.budget === 'luxury' ? 'Только топовые заведения' : profile.budget === 'budget' ? 'Бюджетные и бесплатные места' : 'Баланс цена/качество'}`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
     messages: [{ role: 'user', content: prompt }],
+    response_format: { type: 'json_object' },
+    max_tokens: 4096,
   })
 
-  const text = (message.content[0] as { type: string; text: string }).text
-  const json = JSON.parse(text)
-
+  const json = JSON.parse(response.choices[0].message.content!)
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2)
   return { id, city: profile.city, ...json }
 }
@@ -92,7 +92,7 @@ export async function generateQuest(
   }
 
   const stopsList = stops
-    .map((s, i) => `${i + 1}. ${s.name} (${s.address}) — ${s.description}`)
+    .map((s, i) => `${i + 1}. ${s.name} (id: ${s.id}) — ${s.description}`)
     .join('\n')
 
   const prompt = `Создай квест-историю для ребёнка ${childAge} лет, который обожает "${childInterest}".
@@ -106,7 +106,7 @@ ${stopsList}
   "intro": "вступление в квест 2-3 предложения, захватывающее",
   "steps": [
     {
-      "stopId": "id остановки",
+      "stopId": "id остановки из списка выше",
       "narrative": "мини-история про это место 2-3 предложения",
       "task": "задание для ребёнка в этом месте (найти, посчитать, угадать...)",
       "emoji": "подходящий эмодзи"
@@ -117,12 +117,12 @@ ${stopsList}
 
 Язык: живой, для детей ${childAge} лет. Задания реально выполнимые на месте.`
 
-  const message = await client.messages.create({
-    model: 'claude-sonnet-4-6',
-    max_tokens: 3000,
+  const response = await getClient().chat.completions.create({
+    model: MODEL,
     messages: [{ role: 'user', content: prompt }],
+    response_format: { type: 'json_object' },
+    max_tokens: 3000,
   })
 
-  const text = (message.content[0] as { type: string; text: string }).text
-  return JSON.parse(text)
+  return JSON.parse(response.choices[0].message.content!)
 }
