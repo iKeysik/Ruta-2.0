@@ -20,7 +20,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ru" className={geist.variable} suppressHydrationWarning>
+    <html lang="ru" className={geist.variable} data-theme="explorer" suppressHydrationWarning>
       <body className="min-h-screen flex flex-col antialiased">
         <ThemeProvider>{children}</ThemeProvider>
       </body>

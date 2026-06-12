@@ -1,5 +1,21 @@
 @import "tailwindcss";
 
+/* === Fallback (before JS sets data-theme) === */
+:root {
+  --bg-primary: #0d1117;
+  --bg-secondary: #161b22;
+  --bg-card: rgba(255,255,255,0.05);
+  --bg-card-hover: rgba(255,255,255,0.08);
+  --border: rgba(255,255,255,0.1);
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --accent: #a855f7;
+  --accent-2: #f97316;
+  --accent-gradient: linear-gradient(135deg,#a855f7,#f97316);
+  --input-bg: rgba(255,255,255,0.07);
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
 /* === Theme A: Explorer (dark, modern) === */
 [data-theme="explorer"] {
   --bg-primary: #0d1117;
