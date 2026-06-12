@@ -78,6 +78,32 @@ export default function RoutePage() {
       </header>
 
       <div style={{ maxWidth: '900px', margin: '0 auto', padding: '24px 24px 48px' }}>
+        {/* Demo mode banner */}
+        {(route as GeneratedRoute & { _demo?: boolean })._demo && (
+          <div
+            style={{
+              marginBottom: '16px',
+              padding: '10px 16px',
+              background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(249,115,22,0.10))',
+              border: '1px solid var(--border)',
+              borderRadius: '12px',
+              fontSize: '13px',
+              color: 'var(--text-secondary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <span>🎭</span>
+            <span>
+              <strong style={{ color: 'var(--text-primary)' }}>Демо-режим</strong> — работает без API ключей. Добавь{' '}
+              <code style={{ fontFamily: 'monospace', fontSize: '11px', background: 'var(--bg-card)', padding: '1px 5px', borderRadius: '4px' }}>ANTHROPIC_API_KEY</code>{' '}
+              в <code style={{ fontFamily: 'monospace', fontSize: '11px', background: 'var(--bg-card)', padding: '1px 5px', borderRadius: '4px' }}>.env.local</code>{' '}
+              для генерации реальных маршрутов.
+            </span>
+          </div>
+        )}
+
         {/* Route header */}
         <div style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>

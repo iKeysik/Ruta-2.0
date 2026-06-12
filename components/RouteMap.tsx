@@ -19,7 +19,10 @@ export function RouteMap({ stops, className }: Props) {
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN
     if (!token) return
 
-    import('mapbox-gl').then(({ default: mapboxgl }) => {
+    Promise.all([
+      import('mapbox-gl'),
+      import('mapbox-gl/dist/mapbox-gl.css' as string),
+    ]).then(([{ default: mapboxgl }]) => {
       mapboxgl.accessToken = token
 
       const center = stops[Math.floor(stops.length / 2)]
