@@ -1,0 +1,14 @@
+{
+  "name": "Ruta 2.0 — Умные маршруты",
+  "short_name": "Ruta",
+  "description": "Персональные маршруты с учётом погоды, бюджета и детей",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0d1117",
+  "theme_color": "#0d1117",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

@@ -1,65 +1,136 @@
-import Image from "next/image";
+import { ThemeToggle } from '@/components/ThemeToggle'
+import { SearchBar } from '@/components/SearchBar'
 
-export default function Home() {
+const PRESETS = [
+  { icon: '👨‍👩‍👧', label: 'Семья с детьми', q: 'семья с ребёнком 6 лет, достопримечательности, 4 часа' },
+  { icon: '💑', label: 'Пара', q: 'романтическая прогулка для пары, уютные места' },
+  { icon: '🎒', label: 'Бюджетно', q: 'бюджетный маршрут, максимум впечатлений, минимум трат' },
+  { icon: '🥂', label: 'Люкс', q: 'премиум маршрут, лучшие рестораны и заведения города' },
+  { icon: '🍺', label: 'Бары', q: 'лучшие бары и места для вечернего отдыха' },
+  { icon: '🏃', label: 'Активный день', q: 'активный маршрут для одиночного туриста, весь день' },
+]
+
+export default function HomePage() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <header
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '16px 24px',
+          borderBottom: '1px solid var(--border)',
+          background: 'var(--bg-secondary)',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '24px' }}>🗺️</span>
+          <span style={{ fontWeight: 800, fontSize: '20px' }} className="accent-text">
+            Ruta
+          </span>
+          <span style={{ fontSize: '12px', color: 'var(--text-secondary)', marginLeft: '4px' }}>
+            2.0
+          </span>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+        <ThemeToggle />
+      </header>
+
+      <section
+        style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '60px 24px 40px',
+          textAlign: 'center',
+        }}
+      >
+        <h1
+          style={{
+            fontSize: 'clamp(28px, 5vw, 52px)',
+            fontWeight: 800,
+            lineHeight: 1.15,
+            marginBottom: '16px',
+            maxWidth: '700px',
+          }}
+        >
+          Умные маршруты{' '}
+          <span className="accent-text">для любого путешествия</span>
+        </h1>
+        <p
+          style={{
+            fontSize: '18px',
+            color: 'var(--text-secondary)',
+            marginBottom: '40px',
+            maxWidth: '500px',
+            lineHeight: 1.6,
+          }}
+        >
+          Учитываем погоду, бюджет, возраст детей и интересы. Квесты-сказки для маленьких путешественников.
+        </p>
+
+        <SearchBar />
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+            gap: '12px',
+            marginTop: '48px',
+            width: '100%',
+            maxWidth: '640px',
+          }}
+        >
+          {PRESETS.map(p => (
+            <a
+              key={p.label}
+              href={`/plan?q=${encodeURIComponent(p.q)}`}
+              className="card"
+              style={{
+                padding: '16px',
+                textDecoration: 'none',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: '6px',
+                cursor: 'pointer',
+              }}
+            >
+              <span style={{ fontSize: '28px' }}>{p.icon}</span>
+              <span style={{ fontWeight: 600, fontSize: '13px', color: 'var(--text-primary)', textAlign: 'center' }}>
+                {p.label}
+              </span>
+            </a>
+          ))}
         </div>
-      </main>
-    </div>
-  );
+      </section>
+
+      <section
+        style={{
+          background: 'var(--bg-secondary)',
+          borderTop: '1px solid var(--border)',
+          padding: '32px 24px',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '40px',
+          flexWrap: 'wrap',
+        }}
+      >
+        {[
+          { icon: '🌤️', text: 'Адаптация к погоде' },
+          { icon: '👶', text: 'Маршруты для детей' },
+          { icon: '📖', text: 'Квесты-сказки' },
+          { icon: '💰', text: 'Любой бюджет' },
+          { icon: '🗺️', text: 'Интерактивная карта' },
+          { icon: '🎙️', text: 'Голосовой ввод' },
+        ].map(f => (
+          <div key={f.text} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+            <span style={{ fontSize: '20px' }}>{f.icon}</span>
+            <span style={{ color: 'var(--text-secondary)' }}>{f.text}</span>
+          </div>
+        ))}
+      </section>
+    </main>
+  )
 }
